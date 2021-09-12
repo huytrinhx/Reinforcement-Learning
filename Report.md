@@ -1,6 +1,6 @@
 [//]: # (Image References)
 
-[image1]: https://user-images.githubusercontent.com/10624937/42135619-d90f2f28-7d12-11e8-8823-82b970a54d7e.gif "Trained Agent"
+[image1]: https://github.com/huytrinhx/DQN-Banana-Collector/blob/main/Images/ScoresChart.png
 
 # Project 1: Navigation
 
@@ -8,7 +8,7 @@
 
 Using Deep Q Learning Neural Network, the agent showed it can solve the environment after more than 500 episodes. As mentioned in the ReadMe.md, the environment is considered solved if the agent's mean scores in the last 100 episodes is greater than 13. The chart below showed the agent score progression during the training
 
-![Trained Agent][image1]
+![Score Chart][image1]
 
 ### Algorithms
 
