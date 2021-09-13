@@ -39,6 +39,26 @@ The task is episodic, and in order to solve the environment, our agent must get 
 
 Alternatively, you can clone the entire repo which has already loaded the Banana.exe environment. However, please make sure you are using a 64-bit Windows machine otherwise the environment won't work.
 
+### Downloading and Installing Dependencies
+In addition to downloading the Unity Banana Collector environment above, please make sure you download and install the following dependences for your python environment (ex.. anaconda...)
+
+tensorflow==1.7.1
+Pillow>=4.2.1
+matplotlib
+numpy>=1.11.0
+jupyter
+pytest>=3.2.2
+docopt
+pyyaml
+protobuf==3.5.2
+grpcio==1.11.0
+torch==0.4.0
+pandas
+scipy
+ipykernel 
+
+Alternatively, you can follow the following instructions from the Dependencies section of the Deep Reinforcement Learning nanodegree repo (https://github.com/udacity/deep-reinforcement-learning/blob/master/README.md) to complete the set up the python environment as well as all necessary libraris.
+
 ### Files in Repo
 
 - Navigation.ipynb: the notebook that walks you through the process of starting the environment, training the agent.
