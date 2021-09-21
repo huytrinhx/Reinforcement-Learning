@@ -1,6 +1,6 @@
 [//]: # (Image References)
 
-[image1]: https://github.com/huytrinhx/DQN-Banana-Collector/blob/main/Images/ScoresChart.png
+[image1]: https://github.com/huytrinhx/DDPG-Robotic-Arm/blob/main/Images/ScoresChart.png
 
 # Project 2: DDPG for Continuous Actions Environment
 
