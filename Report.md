@@ -66,7 +66,7 @@ This is the decay factor to reduce noise as the agent goes
 
 Our model consiste of 2 fully connected hidden layers with input as the state representation (33 states) of the environment and output as the predicted action for individual actions (a vector size of 4).
 
-Layer 1 has 300 units and Layer 2 has 200 units. The action space was clipped between -1 and 1.
+Layer 1 has 300 units and Layer 2 has 200 units. The action output space was clipped between -1 and 1.
 
 #### Critic
 
@@ -76,11 +76,12 @@ Layer 1 has 300 units and Layer 2 has 204 (200+4) units.
 
 ### Future Ideas
 
-There are 3 main ideas (coming from very recent researches) that the author would like to try to improve the agent performance:
+There are 3 main ideas (coming from recent researches) that the author would like to try to improve the agent performance:
 
--  Distributed Distributional Deterministic Policy Gradients (D4PG): we will modify the DDPG algorithm in 4 places. First, we will include a distributional critic update. In this enhancement, we'll introduce a random variable Z so that the update to critic will take a form of a distribution instead of a single target. Second, we will use distributed parallel actors, which is similar to the implementation of this project. Third, we'll utilize N-step returns in estimating the TD error. N is also generated randomly to create a distribution of expectations as part of the first modification. Lastly, we'll factor in prioritization of experience replay, where a priority p is assigned to each experience based on reward so that higher reward experiences can be sampled more often. (https://openreview.net/pdf?id=SyZipzbCb)
+-  Distributed Distributional Deterministic Policy Gradients (D4PG): we will modify the DDPG algorithm in 4 places. First, we will include a distributional critic update. In this enhancement, we'll introduce a random variable Z so that the update to critic will take a form of a distribution of expectations instead of a single target. Second, we will use distributed parallel actors, which is similar to the implementation of this project. Third, we'll utilize N-step returns in estimating the TD error. N is also generated randomly to create a distribution of expectations as part of the first modification. Lastly, we'll factor in prioritization of experience replay, where a priority p is assigned to each experience based on reward so that higher reward experiences can be sampled more often. (https://openreview.net/pdf?id=SyZipzbCb)
 
-- Generalalized Advantage Estimation: the idea is to create a duelling Q-networks during the training. The architecture is similar to the version implemented in this project. However, the difference is this duelling network contains an advantage function that calculates the advantage that each actions would make. This value is then combined with the predicted state values to arrive at the final state-action values. (https://arxiv.org/abs/1511.06581)
+- Trust Region Policy Optimization (TRPO): Extending from basic policy gradient methods, we will introduce a surrogate objective function for optimization step during the policy update. First, iteratively, we collect a set of state-action pairs along with Monte Carlo estimates of their Q-values. Then we average those samples to construct the estimated surrogate objective with the constraint with the constraint on the size of the policy update. (https://arxiv.org/pdf/1502.05477.pdf)
 
-- Trust Region Policy Otimization (TRPO): the idea is to use pixels of the picture as the input layer for the networks instead of the state representation. Because of dealing with pictures, our model architecture and pipeline have to adjusted to include image preprocessing steps and convolution layers instead of linear layers.
+- Proximal Policy Optimization (PPO): Extending the TRPO methods, the idea is to introduced the clipping of probability ratios during the optimization of the surrogate objective function. The algorithm alternate between sampling data from the policy and performing several epochs of optimizations.(https://arxiv.org/pdf/1707.06347.pdf)
+
 
