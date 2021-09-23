@@ -52,13 +52,13 @@ This is the size of the update on local networks (actor and critic) parameters o
 
 This is the number of time steps occuring between each learning step. As mentioned above, this serves as the delay between the syncing of local networks and target networks.
 
-7. N_LEARN = 5
+7. N_LEARN = 10
 
 This is the number of consecutive training steps when we update the networks
 
 8. NOISE_DECAY = 1e-6
 
-This is the decay factor to reduce noise as the agent goes
+This is the decay factor to reduce noise as the agent goes in each episode.
 
 ### Model Architecture
 
@@ -72,7 +72,7 @@ Layer 1 has 300 units and Layer 2 has 200 units. The action output space was cli
 
 Our model consiste of 2 fully connected hidden layers with input as the state representation (33 states) of the environment and output as a single predicted value for state-action pair (a vector size of 1). Actions input was introduced in the 2nd hidden layer.
 
-Layer 1 has 300 units and Layer 2 has 204 (200+4) units.
+Layer 1 has 600 units and Layer 2 has 404 (400+4) units.
 
 ### Future Ideas
 

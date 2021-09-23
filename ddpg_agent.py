@@ -17,8 +17,8 @@ LR_ACTOR = 1e-4         # learning rate of the actor
 LR_CRITIC = 1e-4        # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay
 NOISE_DECAY = 1e-6      # Noise decay
-UPDATE_EVERY = 20        # Delay in time steps to update local actor and critics
-N_LEARN = 5           # Number of consecutive updates to networks each time
+UPDATE_EVERY = 20       # Delay in time steps to update local actor and critics
+N_LEARN = 10            # Number of consecutive updates to networks each time
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
