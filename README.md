@@ -66,7 +66,7 @@ The environment is considered solved, when the average (over 100 episodes) of th
 Alternatively, you can clone the entire repo which has already loaded the Reacher.exe environment. However, please make sure you are using a 64-bit Windows machine otherwise the environment won't work.
 
 ### Downloading and Installing Dependencies
-In addition to downloading the Unity Banana Collector environment above, please make sure you download and install the following dependences for your python environment (ex.. anaconda...)
+In addition to downloading the Reacher environment above, please make sure you download and install the following dependences for your python environment (ex.. anaconda...)
 
 tensorflow==1.7.1
 Pillow>=4.2.1
