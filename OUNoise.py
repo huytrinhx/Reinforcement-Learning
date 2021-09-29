@@ -5,7 +5,7 @@ import torch
 # from https://github.com/songrotek/DDPG/blob/master/ou_noise.py
 class OUNoise:
 
-    def __init__(self, action_dimension, scale=0.1, mu=0, theta=0.15, sigma=0.2):
+    def __init__(self, action_dimension, scale=0.1, mu=0, theta=0.13, sigma=0.2):
         self.action_dimension = action_dimension
         self.scale = scale
         self.mu = mu
@@ -21,4 +21,5 @@ class OUNoise:
         x = self.state
         dx = self.theta * (self.mu - x) + self.sigma * np.random.standard_normal(size=len(x))
         self.state = x + dx
+        # print(self.state*self.scale)
         return torch.tensor(self.state * self.scale).float()
