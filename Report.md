@@ -1,12 +1,12 @@
 [//]: # (Image References)
 
-[image1]: https://github.com/huytrinhx/MADDPG-Play-Tennis/blob/main/ScoresChart.jpg
+[image1]: https://github.com/huytrinhx/MADPPG-Play-Tennis/blob/main/ScoreChart.JPG
 
 # Project 3: MADDPG for Multiagent Environment: Collaboration vs Competition
 
 ### Overview
 
-Using Deep Deterministic Policy Gradient (DDPG) Network, the agent showed it can solve the environment in less than 200 episodes in distributed learning environment. As mentioned in the ReadMe.md, the environment is considered solved if the agent's mean scores in the last 100 episodes is greater than 30. The chart below showed the agent score progression during the training
+Adapting Deep Deterministic Policy Gradient (DDPG) Network to multi-agent environment, the agent showed it can solve the environment in less than 2000 episodes. As mentioned in the ReadMe.md, the environment is considered solved if the agent's mean scores in the last 100 episodes is greater than 0.5. The chart below showed the agent score progression during the training
 
 ![Score Chart][image1]
 
