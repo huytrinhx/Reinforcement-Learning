@@ -6,32 +6,29 @@
 
 ### Overview
 
-Adapting Deep Deterministic Policy Gradient (DDPG) Network to multi-agent environment, the agent showed it can solve the environment in less than 2000 episodes. As mentioned in the ReadMe.md, the environment is considered solved if the agent's mean scores in the last 100 episodes is greater than 0.5. The chart below showed the agent score progression during the training
+Adapting Deep Deterministic Policy Gradient (DDPG) Network to multi-agent environment, the agent showed it can solve the environment in less than 2000 episodes. As mentioned in the ReadMe.md, the environment is considered solved if the agents' mean scores in the last 100 episodes is greater than 0.5. The chart below showed the agent score progression during the training
 
 ![Score Chart][image1]
 
 ### Algorithms
 
-The full algorithm for training DDPG is fully explained in section Algorithm of the DDPG paper (https://arxiv.org/abs/1509.02971). In the beginning, we initialize the critic network (Q) and actor network (Mu) with random weights. At the same time, we initilize target networks by cloning both critic and actor network.
+The full algorithm for training DDPG is fully explained in section Algorithm of the DDPG paper (https://arxiv.org/abs/1509.02971). You can also view my interpretation of the algorithm in this repo (https://github.com/huytrinhx/DDPG-Robotic-Arm/main/Report.md).
 
-For each time step in the episode, the agent selects and executes actions according to a policy generated from local actor network and exploration noise. The agent observes reward and new state and store this transition into experience replay buffer . Experience replay means we store the agent's experiences at each time step for many episodes. 
+In order to apply DDPG to multi-agent environment, I make two following important modifications to the original DDPG:
 
-Then, at the same time, we sample the experiences randomly to update the critic by minimizing the loss from predicted actions and values generated from target actor and target critic respectively. Meanwhile, the actor is updated by minimizing the loss from predicted actions and values generated from local actor and local critic respectively.
+- Centralized Training: The critic is updated with the shared experience replay during the training step. They take in all (global) observations of the environment and actions of all agents in the environment.
 
-Another feature of the algorithm is to use delayed intensive update to sync target with the local networks. Particularly, for every learn step (which happened once every k time steps), we blend or soft update the local networks with the target network. This feature is supposed to make the algorithm more stable compared to the standard version. Additionally, generating the targets using an older set of parameters (soft updates) adds a delay between the time an update to local networks is made and the time the update affects the target networks, making divergence or oscillations much more unlikely.
+- Decentralized Execution: Each agent's actor is responsible for producing the action based on the agent's local observation of the environment.
 
-Since we are dealing with low dimensional feature vector observations, we utilize a technique called batch normalization on the state input. According to the paper, different components of the observation may have different physical units and the ranges may vary across environments. This can make it difficult for the network to learn effectively and make make it difficult to find hyperparameters which generalize across environments with different scales of state values. With batch normalization, we observed that learning happened more quickly.
-
-Lastly, we tackle exploration, a major challenge in continouse action spaces by using a noise process (Ornstein-Uhlenbeck process), which reset in each episode. Additionally, we add a noise decay parameters so that the actions become less exploratory as time goes on.
-
+The full algorithm for MADDPG is fully explained in section Algorithm of the MADDPG paper (https://arxiv.org/abs/1706.02275)
 
 ### Hyperparameters
 
 1. BUFFER_SIZE = int(1e6)
 
-This is the size of the most recent memories we store during run time. In practice, we are not going to store all the experiences since beginning, but only retain a certain amount of most recent experiences. This model uses 100000 as buffer size, which contains roughly 100 most recent episodes.
+This is the size of the most recent memories we store during run time. In practice, we are not going to store all the experiences since beginning, but only retain a certain amount of most recent experiences. This model uses 100000 as buffer size, which contains roughly 300 most recent episodes.
 
-2. BATCH_SIZE = 128
+2. BATCH_SIZE = 256
 
 This is the number of experiences we randomly sample from the above pool for each learning update step
 
@@ -39,49 +36,56 @@ This is the number of experiences we randomly sample from the above pool for eac
 
 This is the discounting factor use in calculate the present value of the action. 
 
-4. TAU  = 1e-3
+4. TAU  = 6e-2
 
 This is the proprotion of local networks we retain when copying the parameters of the local networks to target networks in every k time steps. In practice, we do not clone 100% of the local networks.
 
-5. LR_ACTOR = 1e-4
-   LC_CRITIC = 1e-4
+5. LR_ACTOR = 5e-4
+   LC_CRITIC = 5e-4
 
 This is the size of the update on local networks (actor and critic) parameters on each training step. Larger value may cause the model not improve or plateau too early after a certain number of episodes. Smaller value may take the model too long to get to the desired performance.
 
-6. UPDATE_EVERY = 20
+6. UPDATE_EVERY = 2
 
 This is the number of time steps occuring between each learning step. As mentioned above, this serves as the delay between the syncing of local networks and target networks.
 
-7. N_LEARN = 10
+7. N_TRAIN = 4
 
 This is the number of consecutive training steps when we update the networks
 
-8. NOISE_DECAY = 1e-6
+8. NOISE = 6 
+   NOISE_DECAY = 0.9999
+   NOISE_END = 0.0
+   NOISE_END_AFTER = 10000
 
-This is the decay factor to reduce noise as the agent goes in each episode.
+In this project, I deloy a technique called Exploratory Boost. In the beginning, noise scale start at 6 (NOISE) and then decay at a rate of 0.9999 (NOISE_DECAY) in each update. After timestep 10000 (NOISE_END_AFTER), it will set noise to 0 (NOISE_END), when the actions of actor are determined deterministically by actor network.
 
 ### Model Architecture
 
-#### Actor
+In this project, 2 agents interact with each other and they have the same model architecture.
 
-Our model consiste of 2 fully connected hidden layers with input as the state representation (33 states) of the environment and output as the predicted action for individual actions (a vector size of 4).
+#### Actor (x2)
 
-Layer 1 has 300 units and Layer 2 has 200 units. The action output space was clipped between -1 and 1.
+Each actor consists of 2 fully connected hidden layers with input as the state representation (24 states) of the environment and output as the predicted action for individual actions (a vector size of 2).
 
-#### Critic
+Layer 1 has 256 units and Layer 2 has 128 units. The action output space was clipped between -1 and 1.
 
-Our model consiste of 2 fully connected hidden layers with input as the state representation (33 states) of the environment and output as a single predicted value for state-action pair (a vector size of 1). Actions input was introduced in the 2nd hidden layer.
+#### Critic (x2)
 
-Layer 1 has 600 units and Layer 2 has 404 (400+4) units.
+Each critic consists of 2 fully connected hidden layers with input as full state representation of 2 agents (24 * 2 states) of the environment and output as a single predicted value for state-action pair (a vector size of 1). Actions input (2 * 2 vector size, full action representation of 2 agents) was introduced in the 2nd hidden layer.
+
+Layer 1 has 256 units and Layer 2 has 132 (128+4) units.
 
 ### Future Ideas
 
 There are 3 main ideas (coming from recent researches) that the author would like to try to improve the agent performance:
 
--  Distributed Distributional Deterministic Policy Gradients (D4PG): we will modify the DDPG algorithm in 4 places. First, we will include a distributional critic update. In this enhancement, we'll introduce a random variable Z so that the update to critic will take a form of a distribution of expectations instead of a single target. Second, we will use distributed parallel actors, which is similar to the implementation of this project. Third, we'll utilize N-step returns in estimating the TD error. N is also generated randomly to create a distribution of expectations as part of the first modification. Lastly, we'll factor in prioritization of experience replay, where a priority p is assigned to each experience based on reward so that higher reward experiences can be sampled more often. (https://openreview.net/pdf?id=SyZipzbCb)
+-  Twin Delayed DDPG: 
+-  Prioritized Experience Replay:
+-  Pixel-based Training: 
 
-- Trust Region Policy Optimization (TRPO): Extending from basic policy gradient methods, we will introduce a surrogate objective function for optimization step during the policy update. First, iteratively, we collect a set of state-action pairs along with Monte Carlo estimates of their Q-values. Then we average those samples to construct the estimated surrogate objective with the constraint with the constraint on the size of the policy update. (https://arxiv.org/pdf/1502.05477.pdf)
+### On reproducibility
 
-- Proximal Policy Optimization (PPO): Extending the TRPO methods, the idea is to introduced the clipping of probability ratios during the optimization of the surrogate objective function. The algorithm alternate between sampling data from the policy and performing several epochs of optimizations.(https://arxiv.org/pdf/1707.06347.pdf)
+
 
 
