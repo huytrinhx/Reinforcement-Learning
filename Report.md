@@ -80,11 +80,15 @@ Layer 1 has 256 units and Layer 2 has 132 (128+4) units.
 
 There are 3 main ideas (coming from recent researches) that the author would like to try to improve the agent performance:
 
--  Twin Delayed DDPG: 
--  Prioritized Experience Replay:
--  Pixel-based Training: 
+-  Twin Delayed DDPG: Perhaps the biggest problem with DDPG is its brittleness. A common failure is the learned Q functions begins to dramatically overerstimate Q-values, which then leads to policy breaking. Therefore, trick one is to learn 2 Q-functions at the same time and use the smaller of 2 to for the targets in the Bellman error loss functions. Trick 2 is to update the policy and target networks less frequent than the Q function.
+-  Prioritized Experience Replay: Not all experiences are equal to learning. Perhaps the best way to make important experiences more likely to be sampled to add TD-error to each experience and using that as a weight.
+-  Pixel-based Training: the idea is to use pixels of the picture as the input layer for the networks instead of the state representation. Because of dealing with pictures, our model architecture and pipeline have to adjusted to include image preprocessing steps and convolution layers instead of linear layers.
 
 ### On reproducibility
+
+While solving for environments, I have tried to reproduce the results of many repos of those who have taken the Udacity course before me. However, I was hardly able to recreate what they did. The difference may lie on how each machine generated seed and that eventually made whether the agents made a breakthrough during training.
+
+Please note I used seed=0 for this project, using different seed and running on different environments may generate different results ( taking longer or shorter to achieve the benchmark). In that situations, please be patient to experiement with different hyperparameters like tau, n_train, update_every or hidden layers sizes. Good luck!!!
 
 
 
