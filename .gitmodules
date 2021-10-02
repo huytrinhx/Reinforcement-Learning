@@ -1,3 +1,0 @@
-[submodule "dqn-banana-collector"]
-	path = dqn-banana-collector
-	url = https://github.com/huytrinhx/DQN-Banana-Collector.git
