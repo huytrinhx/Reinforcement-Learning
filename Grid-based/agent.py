@@ -1,8 +1,8 @@
 import numpy as np
 import random
-from collections import namedtuple, deque
 
 from model import QNetwork
+from replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
 
 import torch
 import torch.nn.functional as F
@@ -17,7 +17,7 @@ UPDATE_EVERY = 4
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-class Agent():
+class DQNAgent():
     
     def __init__(self, state_size, action_size, seed):
         
@@ -68,6 +68,7 @@ class Agent():
             experiences (Tuple[torch.Tensor]): tuple of (s, a, r, s', done) tuples 
             gamma (float): discount factor
         """
+        
         states, actions, rewards, next_states, dones = experiences
 
         # Get max predicted Q values (for next states) from target model
@@ -93,35 +94,61 @@ class Agent():
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
 
-            
-class ReplayBuffer:
-    
-    def __init__(self, action_size, buffer_size, batch_size, seed):
-        self.action_size = action_size
-        self.memory = deque(maxlen=buffer_size)
-        self.batch_size = batch_size
-        self.experience = namedtuple("Experience", field_names=["state","action","reward","next_state","done"])
-        self.seed = random.seed(seed)
-        
-    def add(self,state,action,reward,next_state,done):
-        e = self.experience(state,action,reward,next_state,done)
-        self.memory.append(e)
-        
-    def sample(self):
-        """Randomly sample a batch of experiences from memory."""
-        experiences = random.sample(self.memory, k=self.batch_size)
-        
 
-        states = torch.from_numpy(np.vstack([e.state for e in experiences if e is not None])).float().to(device)
-        actions = torch.from_numpy(np.vstack([e.action for e in experiences if e is not None])).long().to(device)
-        rewards = torch.from_numpy(np.vstack([e.reward for e in experiences if e is not None])).float().to(device)
-        next_states = torch.from_numpy(np.vstack([e.next_state for e in experiences if e is not None])).float().to(device)
-        dones = torch.from_numpy(np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8)).float().to(device)
-  
-        return (states, actions, rewards, next_states, dones)
+    def save_checkpoints(self, model_dir="./model_dir/", mean_score=0.0):  
+        torch.save(self.qnetwork_local.state_dict(), "{0}agent_checkpoint_{1}.pth".format(model_dir,int(mean_score)))
+
+    def load_checkpoints(self, model_dir="./model_dir/", mean_score=0.0):
+        self.qnetwork_local.load_state_dict(torch.load("{0}agent_checkpoint_{1}.pth".format(model_dir,int(mean_score))))
+
         
-    
-    def __len__(self):
-        return len(self.memory)
-        
-        
+class DQNAgent_PER(DQNAgent):
+
+    def __init__(self, state_size, action_size, seed):
+        super(DQNAgent, self).__init__(state_size, action_size, seed)
+        self.memory = PrioritizedReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, seed)
+
+    def learn(self, experiences, gamma):
+        """Update value parameters using given batch of experience tuples.
+
+        Params
+        ======
+            experiences (Tuple[torch.Tensor]): tuple of (s, a, r, s', done) tuples 
+            gamma (float): discount factor
+        """
+        states, actions, rewards, next_states, dones, idxs, weights = experiences
+       
+
+        # Get max predicted Q values (for next states) from target model
+        Q_targets_next = self.qnetwork_target(next_states).detach().max(1)[0].unsqueeze(1)
+        # Compute Q targets for current states 
+        Q_targets = rewards + (gamma * Q_targets_next * (1 - dones))
+
+        # Get expected Q values from local model
+        Q_expected = self.qnetwork_local(states).gather(1, actions)
+
+        # Compute loss MSE
+        loss = (Q_expected - Q_targets.detach()).pow(2)
+        # Add weights to loss
+        loss = loss * weights
+        # Add noise to loss to arrive at prior weights
+        prios = loss + 1e-5
+        # Take mean
+        loss = loss.mean()
+
+        # Minimize the loss
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        # Update buffer priorities
+        self.memory.update_priorities(idxs, prios.data.cpu().numpy())
+
+
+
+        # ------------------- update target network ------------------- #
+        self.soft_update(self.qnetwork_local, self.qnetwork_target, TAU)                     
+
+
+
+
