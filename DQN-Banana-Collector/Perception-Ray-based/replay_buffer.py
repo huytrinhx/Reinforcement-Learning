@@ -51,15 +51,27 @@ class PrioritizedReplayBuffer(ReplayBuffer):
 
     def __init__(self, action_size, buffer_size, batch_size, seed):
         super(PrioritizedReplayBuffer, self).__init__(action_size, buffer_size, batch_size, seed)
+        
         self.tree = SumTree(buffer_size)
         self.max_priority = 1
         
     def add(self,state,action,reward,next_state,done):
+        """
+        whenever importance sampling is used, all weights wi were scaled
+        so that maxi wi = 1. We found that this worked better in practice as it kept all weights within a
+        reasonable range, avoiding the possibility of extremely large updates
+
+        """
         e = self.experience(state,action,reward,next_state,done)
         self.memory.append(e)
         self.tree.add(self.max_priority,None)
         
     def sample(self):
+        """o sample a minibatch of size k, the range [0, pTotal] is divided equally into k ranges. 
+        Next, a value is uniformly sampled from each range range. 
+        Finally the transitions that correspond to each of these sampled values are retrieved from the tree.
+        
+        """
 
         segment = self.tree.total() / self.batch_size
         """"""

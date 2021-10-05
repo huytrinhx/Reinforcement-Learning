@@ -110,7 +110,7 @@ class DQNAgent_PER(DQNAgent):
 
     def learn(self, experiences, gamma):
         """Update value parameters using given batch of experience tuples.
-
+        
         Params
         ======
             experiences (Tuple[torch.Tensor]): tuple of (s, a, r, s', done) tuples 
