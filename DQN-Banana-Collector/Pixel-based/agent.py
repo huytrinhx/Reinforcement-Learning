@@ -9,11 +9,12 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 BUFFER_SIZE = int(1e5)
-BATCH_SIZE = 64
+BATCH_SIZE = 128
 GAMMA = 0.95
-TAU  = 1e-3
+TAU  = 0.06
 LR = 5e-4
-UPDATE_EVERY = 4
+UPDATE_EVERY = 10
+STACK_SIZE = 4
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -34,7 +35,31 @@ class DQNAgent():
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, seed)
         #Initialize time step ( for updating every UPDATE_EVERY steps)
         self.t_step = 0
-        
+        #Implement stack image buffer
+        self.stack_size = STACK_SIZE
+
+    def preprocess_state(self, img):
+        return img @ (0.3,0.1,0.7)
+
+    def stack_images(self, img1, img2):
+        # https://danieltakeshi.github.io/2016/11/25/frame-skipping-and-preprocessing-for-deep-q-networks-on-atari-2600-games/
+        # if image is in greyscale and img1 is fully-stacked
+        # https://github.com/PacktPublishing/Deep-Learning-with-TensorFlow-2-and-Keras/blob/master/Chapter%2011/DQN_Atari_v2.ipynb
+        # print(img1.shape)
+        if img1.shape == 3 and img1.shape[0] == self.stack_size:
+            im = np.append(img1[1:,:,:], np.expand_dims(img2,0), axis=2)
+            im = np.expand_dims(im,axis=0)
+            # print(im.shape)
+            return im
+        else: #otherwise, clone img1 to the size of the stack hyperparams
+            im = np.vstack([img1]*self.stack_size)
+            im = np.squeeze(im,axis=None)
+            # print(im.shape)
+            return im
+
+
+
+
     def step(self, state, action, reward, next_state, done):
         # Save experiece in replay memory
         self.memory.add(state, action, reward, next_state, done)
@@ -148,6 +173,8 @@ class DQNAgent_PER(DQNAgent):
 
         # ------------------- update target network ------------------- #
         self.soft_update(self.qnetwork_local, self.qnetwork_target, TAU)                     
+
+
 
 
 
