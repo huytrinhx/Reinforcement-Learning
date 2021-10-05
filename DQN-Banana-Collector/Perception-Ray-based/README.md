@@ -61,12 +61,15 @@ Alternatively, you can follow the following instructions from the Dependencies s
 
 ### Files in Repo
 
-- Navigation.ipynb: the notebook that walks you through the process of starting the environment, training the agent.
-- dqn_agent.py: an object that contains all methods for our DQN agent and hyperparameters.
+- Navigation_Baseline.ipynb: the notebook that walks you through the process of starting the environment, training the agent with vanilla DQN agent.
+- Navigation_Prioritized_Experience_Replay.ipynb: made modifications to the above notebook to call the Prioritized Experience Replay (PER) version of DQN agent.
+- agent.py: an object that contains all methods for our DQN agent and hyperparameters.
 - model.py: an object that defines our model architecture.
-- checkpoint.pth: the saved model weights of our model after training.
+- replay_buffer.py: an object that defines behaviors of the experience replay buffer
+- sum_tree.py: an object that implements the sum tree to store the weights of each experience
+- ./model_dir/checkpoint.pth: the saved model weights of our model after training.
 - Report.md: further explanation of model, hyperparameters and future ideas.
 
 ### Instructions
 
-Follow the instructions in `Navigation.ipynb` to get started with training your own agent!
+Follow the instructions in `Navigation_Baseline.ipynb` to get started with training your own agent!
