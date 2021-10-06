@@ -12,7 +12,7 @@ For this project, we will train an agent to navigate (and collect bananas!) in a
 
 A reward of +1 is provided for collecting a yellow banana, and a reward of -1 is provided for collecting a blue banana.  Thus, the goal of your agent is to collect as many yellow bananas as possible while avoiding blue bananas. An episode is considered done when there is no more yellow banana or time step is past 300.
 
-The state space has 37 dimensions and contains the agent's velocity, along with ray-based perception of objects around agent's forward direction.  Given this information, the agent has to learn how to best select actions.  Four discrete actions are available, corresponding to:
+The state space is a **RGB-color picture with size 84 x 84** representing what the front camera of the agent captured.  Given this information, the agent has to learn how to best select actions.  Four discrete actions are available, corresponding to:
 - **`0`** - move forward.
 - **`1`** - move backward.
 - **`2`** - turn left.
@@ -24,10 +24,10 @@ The task is episodic, and in order to solve the environment, our agent must get 
 
 1. Download the environment from one of the links below.  You need only select the environment that matches your operating system:
 
-    - Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana_Linux.zip)
-    - Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana.app.zip)
-    - Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana_Windows_x86.zip)
-    - Windows (64-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana_Windows_x86_64.zip)
+    - Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/VisualBanana_Linux.zip)
+    - Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/VisualBanana.app.zip)
+    - Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/VisualBanana_Windows_x86.zip)
+    - Windows (64-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/VIsualBanana_Windows_x86_64.zip)
     
     (_For Windows users_) Check out [this link](https://support.microsoft.com/en-us/help/827218/how-to-determine-whether-a-computer-is-running-a-32-bit-version-or-64) if you need help with determining if your computer is running a 32-bit version or 64-bit version of the Windows operating system.
 
@@ -61,10 +61,12 @@ Alternatively, you can follow the following instructions from the Dependencies s
 
 ### Files in Repo
 
-- Navigation.ipynb: the notebook that walks you through the process of starting the environment, training the agent.
-- dqn_agent.py: an object that contains all methods for our DQN agent and hyperparameters.
+- Navigation_Baseline.ipynb: the notebook that walks you through the process of starting the environment, training the agent with vanilla DQN agent.
+- agent.py: an object that contains all methods for our DQN agent and hyperparameters.
 - model.py: an object that defines our model architecture.
-- checkpoint.pth: the saved model weights of our model after training.
+- replay_buffer.py: an object that defines behaviors of the experience replay buffer
+- sum_tree.py: an object that implements the sum tree to store the weights of each experience
+- ./model_dir/checkpoint.pth: the saved model weights of our model after training.
 - Report.md: further explanation of model, hyperparameters and future ideas.
 
 ### Instructions
