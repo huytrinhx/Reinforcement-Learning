@@ -116,6 +116,13 @@ class Node:
         self.child = child
         
     def explore(self, policy):
+        """Start from the top-node, repeatedly pick the child-node with largest U (expected value + exploration term)
+        If N (visit count) = 0 for the node, play a random game
+        Else, expand node, play a random game from a randomly selected child
+        Update statistics, back-propagate and update N and U as needed
+        Select move with highest N
+        """
+
 
         if self.game.score is not None:
             raise ValueError("game has ended with score {0:d}".format(self.game.score))
@@ -124,12 +131,10 @@ class Node:
 
         
         # explore children of the node
-        # to speed things up 
         while current.child and current.outcome is None:
 
             child = current.child
             max_U = max(c.U for c in child.values())
-            #print("current max_U ", max_U) 
             actions = [ a for a,c in child.items() if c.U == max_U ]
             if len(actions) == 0:
                 print("error zero length ", max_U)
@@ -210,6 +215,7 @@ class Node:
 
         nn_prob = torch.stack([ node.prob for node in child.values() ]).to(device)
 
+        #Select next move based on probabilities
         nextstate = random.choices(list(child.values()), weights=prob)[0]
         
         # V was for the previous player making a move
@@ -219,3 +225,29 @@ class Node:
     def detach_mother(self):
         del self.mother
         self.mother = None
+
+    def search_move(self, policy, n_iter=50, temp=0.1):
+        for _ in range(n_iter):
+            self.explore(policy)
+
+        next_tree, (v, nn_v, p, nn_p) = self.next(temperature=temp)
+        
+        next_tree.detach_mother()
+
+        return next_tree, (v, nn_v, p, nn_p) 
+
+    def step(self, policy, vterm, logterm):
+        current_player = self.game.player
+        # print(current_player)
+        next_tree, (v, nn_v, p, nn_p) = self.search_move(policy)
+        #compute prob* log pi
+        loglist = torch.log(nn_p)*p
+        #constant term to make sure if policy result = MCTS result, loss = 0
+        constant = torch.where(p>0, p*torch.log(p), torch.tensor(0.))
+        #update logterm and vterm
+        logterm.append(-torch.sum(loglist-constant))
+        vterm.append(nn_v*current_player)
+
+        return next_tree, vterm, logterm
+
+
